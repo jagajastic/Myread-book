@@ -12,14 +12,30 @@ class BooksApp extends React.Component {
      * pages, as well as provide a good URL they can bookmark and share.
      */
     showSearchPage: false,
-    Books: []
+    Books: [],
+    currentlyReading: [],
+    wantToRead: [],
+    read: []
   };
 
   componentDidMount() {
     getAll()
       .then(books => {
         this.setState({ Books: books });
-        console.log(books);
+
+        // filter book to different shelf
+        const cReading = this.state.Books.filter(
+          item => item.shelf === "currentlyReading"
+        );
+        const wtRead = this.state.Books.filter(
+          item => item.shelf === "wantToRead"
+        );
+        const readMe = this.state.Books.filter(item => item.shelf === "read");
+
+        // update state for different books
+        this.setState({ currentlyReading: cReading });
+        this.setState({ wantToRead: wtRead });
+        this.setState({ read: readMe });
       })
       .catch(error => {
         console.log(error);
@@ -29,8 +45,9 @@ class BooksApp extends React.Component {
   handleChange = (book, shelf) => {
     console.log(book, shelf);
     update(book, shelf).then(books => {
-      // this.setState({ Books: books });
-      console.log(books);
+      this.setState({ currentlyReading: books.currentlyReading });
+      this.setState({ wantToRead: books.wantToRead });
+      this.setState({ read: books.read });
     });
   };
   render() {
@@ -72,12 +89,8 @@ class BooksApp extends React.Component {
                   <h2 className="bookshelf-title">Currently Reading</h2>
                   <div className="bookshelf-books">
                     <ol className="books-grid">
-                      {this.state.Books.filter(
-                        item => item.shelf === "currentlyReading"
-                      ).length > 0
-                        ? this.state.Books.filter(
-                            item => item.shelf === "currentlyReading"
-                          ).map(item => (
+                      {this.state.currentlyReading.length > 0
+                        ? this.state.currentlyReading.map(item => (
                             <li key={item.id}>
                               <div className="book">
                                 <div className="book-top">
@@ -95,9 +108,7 @@ class BooksApp extends React.Component {
                                         this.handleChange(item, e.target.value)
                                       }
                                     >
-                                      <option value="move" disabled>
-                                        Move to...
-                                      </option>
+                                      <option value="move">Move to...</option>
                                       <option value="currentlyReading">
                                         Currently Reading
                                       </option>
@@ -126,12 +137,8 @@ class BooksApp extends React.Component {
                   <h2 className="bookshelf-title">Want to Read</h2>
                   <div className="bookshelf-books">
                     <ol className="books-grid">
-                      {this.state.Books.filter(
-                        item => item.shelf === "wantToRead"
-                      ).length > 0
-                        ? this.state.Books.filter(
-                            item => item.shelf === "wantToRead"
-                          ).map(book => (
+                      {this.state.wantToRead.length > 0
+                        ? this.state.wantToRead.map(book => (
                             <li key={book.id}>
                               <div className="book">
                                 <div className="book-top">
@@ -149,9 +156,7 @@ class BooksApp extends React.Component {
                                         this.handleChange(book, e.target.value)
                                       }
                                     >
-                                      <option value="move" disabled>
-                                        Move to...
-                                      </option>
+                                      <option value="move">Move to...</option>
                                       <option value="currentlyReading">
                                         Currently Reading
                                       </option>
@@ -180,11 +185,8 @@ class BooksApp extends React.Component {
                   <h2 className="bookshelf-title">Read</h2>
                   <div className="bookshelf-books">
                     <ol className="books-grid">
-                      {this.state.Books.filter(item => item.shelf === "read")
-                        .length > 0
-                        ? this.state.Books.filter(
-                            item => item.shelf === "read"
-                          ).map((book, index) => (
+                      {this.state.read.length > 0
+                        ? this.state.read.map((book, index) => (
                             <li key={index}>
                               <div className="book">
                                 <div className="book-top">
@@ -202,9 +204,7 @@ class BooksApp extends React.Component {
                                         this.handleChange(book, e.target.value)
                                       }
                                     >
-                                      <option value="move" disabled>
-                                        Move to...
-                                      </option>
+                                      <option value="move">Move to...</option>
                                       <option value="currentlyReading">
                                         Currently Reading
                                       </option>
