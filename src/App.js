@@ -1,7 +1,7 @@
 import React from "react";
 // import * as BooksAPI from './BooksAPI'
 import "./App.css";
-import { getAll, update } from "./BooksAPI";
+import { getAll, update, search } from "./BooksAPI";
 
 class BooksApp extends React.Component {
   state = {
@@ -15,7 +15,8 @@ class BooksApp extends React.Component {
     Books: [],
     currentlyReading: [],
     wantToRead: [],
-    read: []
+    read: [],
+    searchResult: []
   };
 
   componentDidMount() {
@@ -42,16 +43,22 @@ class BooksApp extends React.Component {
       });
   }
 
+  handleSearch = e => {
+    console.log(e.target.value);
+    const query = e.target.value;
+    search(query)
+      .then(resp => {
+        this.setState({ searchResult: resp });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
   handleChange = (book, shelf) => {
     update(book, shelf).then(books => {
-      // this.setState((state, books) => ({
-      //   currentlyReading: books.currentlyReading
-      // }));
       getAll()
         .then(resp => {
-          // console.log(resp);
-          // this.setState({ Books: resp });
-
           this.setState({
             currentlyReading: resp.filter(
               item => item.shelf === "currentlyReading"
@@ -88,11 +95,57 @@ class BooksApp extends React.Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                <input type="text" placeholder="Search by title or author" />
+                <input
+                  type="text"
+                  placeholder="Search by title or author"
+                  onChange={this.handleSearch}
+                />
               </div>
             </div>
             <div className="search-books-results">
-              <ol className="books-grid"></ol>
+              <ol className="books-grid">
+                {this.state.searchResult.length > 0
+                  ? this.state.searchResult.map(book => (
+                      <li key={book.id}>
+                        <div className="book">
+                          <div className="book-top">
+                            <div
+                              className="book-cover"
+                              style={{
+                                width: 128,
+                                height: 193,
+                                backgroundImage: `url("${book.imageLinks.smallThumbnail}")`
+                              }}
+                            ></div>
+                            <div className="book-shelf-changer">
+                              <select
+                                onChange={e =>
+                                  this.handleChange(book, e.target.value)
+                                }
+                              >
+                                <option value="move">Move to...</option>
+                                <option value="currentlyReading">
+                                  Currently Reading
+                                </option>
+                                <option value="wantToRead">Want to Read</option>
+                                <option value="read">Read</option>
+                                <option value="none">None</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="book-title">{book.title}</div>
+                          <div className="book-authors">
+                            {book.authors
+                              ? book.authors.map((author, index) => (
+                                  <span key={index}>{author}</span>
+                                ))
+                              : " "}
+                          </div>
+                        </div>
+                      </li>
+                    ))
+                  : ""}
+              </ol>
             </div>
           </div>
         ) : (
