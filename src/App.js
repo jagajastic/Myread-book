@@ -43,11 +43,28 @@ class BooksApp extends React.Component {
   }
 
   handleChange = (book, shelf) => {
-    console.log(book, shelf);
     update(book, shelf).then(books => {
-      this.setState({ currentlyReading: books.currentlyReading });
-      this.setState({ wantToRead: books.wantToRead });
-      this.setState({ read: books.read });
+      // this.setState((state, books) => ({
+      //   currentlyReading: books.currentlyReading
+      // }));
+      getAll()
+        .then(resp => {
+          // console.log(resp);
+          // this.setState({ Books: resp });
+
+          this.setState({
+            currentlyReading: resp.filter(
+              item => item.shelf === "currentlyReading"
+            )
+          });
+          this.setState({
+            wantToRead: resp.filter(item => item.shelf === "wantToRead")
+          });
+          this.setState({ read: resp.filter(item => item.shelf === "read") });
+        })
+        .catch(error => {
+          console.log(error);
+        });
     });
   };
   render() {
